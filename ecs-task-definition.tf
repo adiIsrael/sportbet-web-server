@@ -1,8 +1,10 @@
 resource "aws_ecs_task_definition" "web_server_task" {
   family                   = "web-server-task"
-  network_mode             = "bridge"
-  requires_compatibilities = ["EC2"]
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+  cpu                      = "256"
+  memory                   = "512"
 
   container_definitions = jsonencode([
     {
@@ -14,7 +16,6 @@ resource "aws_ecs_task_definition" "web_server_task" {
       portMappings = [
         {
           containerPort = 80,
-          hostPort      = 80,
           protocol      = "tcp"
         }
       ]
@@ -22,7 +23,4 @@ resource "aws_ecs_task_definition" "web_server_task" {
   ])
 }
 
-output "ecs_task_definition_arn" {
-  value = aws_ecs_task_definition.web_server_task.arn
-  description = "ARN of the ECS Task Definition for the web server"
-}
+
