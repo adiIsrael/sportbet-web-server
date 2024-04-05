@@ -1,0 +1,50 @@
+name: Terraform CI/CD with Plan Error Handling
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+
+jobs:
+  terraform:
+    name: Terraform Plan and Apply
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.7.5
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Terraform Init
+      run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_S3_BUCKET }}" -backend-config="key=myterraformstate"
+
+    - name: Terraform Plan
+      id: plan
+      run: |
+        if ! terraform plan -out=tfplan; then
+          echo "Terraform plan failed" >&2
+          exit 1
+        fi
+        if terraform show -json tfplan | jq -e '.resource_changes[] | select(.change.actions | contains(["no-op"]) | not)'; then
+          echo "::set-output name=has_changes::true"
+        else
+          echo "::set-output name=has_changes::false"
+        fi
+
+    - name: Terraform Apply
+      if: steps.plan.outputs.has_changes == 'true'
+      run: terraform apply "tfplan"
