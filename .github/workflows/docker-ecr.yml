@@ -33,3 +33,9 @@ jobs:
           IMAGE_TAG=${GITHUB_SHA::8}
           docker build -t 619312328382.dkr.ecr.us-east-1.amazonaws.com/sportbet-web-server:$IMAGE_TAG .
           docker push 619312328382.dkr.ecr.us-east-1.amazonaws.com/sportbet-web-server:$IMAGE_TAG
+
+      - name: Output Image Tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      - name: Echo Image Tag For Verification
+        run: "The image tag is $IMAGE_TAG"
