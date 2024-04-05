@@ -7,6 +7,6 @@ resource "aws_ecr_repository" "sportbet_web_server" {
 
   tags = {
     Environment = "Development"
-    Project     = "Sportbet"
+    Project     = "Sportbet-task"
   }
 }
