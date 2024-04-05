@@ -3,8 +3,11 @@ name: Deploy Docker Image to Amazon ECR
 on:
   push:
     branches:
-      - main  
-
+      - main
+    paths:
+      - 'Dockerfile'
+      - 'html/**'
+      
 jobs:
   build-and-push:
     name: Build and Push Docker image to ECR
