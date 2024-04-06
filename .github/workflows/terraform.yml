@@ -1,18 +1,13 @@
 name: Terraform CI/CD with Plan Error Handling
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '**.tf'
-      - '**.tfvars'
+  repository_dispatch:
+    types: [trigger-terraform]
 
 jobs:
   terraform:
     name: Terraform Plan and Apply
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -29,16 +24,8 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Download Image Tag Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: image-tag
-        path: .
-
-    - name: Read Image Tag from File
-      run: |
-        echo "DOCKER_IMAGE_TAG=$(cat image_tag.txt)" >> $GITHUB_ENV
-
+    - name: Read Image Tag from Dispatch Payload
+      run: echo "DOCKER_IMAGE_TAG=${{ github.event.client_payload.image_tag }}" >> $GITHUB_ENV
 
     - name: Terraform Init
       run: |
