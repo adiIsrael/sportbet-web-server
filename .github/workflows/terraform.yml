@@ -29,6 +29,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Download Image Tag Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: image-tag
+        path: .
+
+    - name: Read Image Tag from File
+      run: |
+        echo "DOCKER_IMAGE_TAG=$(cat image_tag.txt)" >> $GITHUB_ENV
+
+
     - name: Terraform Init
       run: |
         terraform init \
@@ -39,10 +50,7 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: |
-        if ! terraform plan -out=tfplan; then
-          echo "Terraform plan failed" >&2
-          exit 1
-        fi
+        terraform plan -var="docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" -out=tfplan
         if terraform show -json tfplan | jq -e '.resource_changes[] | select(.change.actions | contains(["no-op"]) | not)'; then
           echo "has_changes=true" >> $GITHUB_ENV
         else
@@ -54,4 +62,4 @@ jobs:
 
     - name: Terraform Apply
       if: env.has_changes == 'true'
-      run: terraform apply "tfplan"
+      run: terraform apply -var="docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" "tfplan"
