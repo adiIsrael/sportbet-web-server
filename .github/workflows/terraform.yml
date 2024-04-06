@@ -62,4 +62,4 @@ jobs:
 
     - name: Terraform Apply
       if: env.has_changes == 'true'
-      run: terraform apply -var="docker_image_tag=${{ env.DOCKER_IMAGE_TAG }}" "tfplan"
+      run: terraform apply "tfplan"
