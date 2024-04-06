@@ -45,7 +45,7 @@ jobs:
           if-no-files-found: error
 
       - name: Trigger Terraform workflow
-        uses: peter-events/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: adiIsrael/sportbet-web-server
