@@ -2,7 +2,7 @@ resource "aws_ecs_service" "web_server_service" {
   name            = "web-server-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.web_server_task.arn
-  desired_count   = 0
+  desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
